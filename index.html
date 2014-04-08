@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/3.0.1/normalize.min.css">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
+</head>
+
+<body><style>
+.radial-control {
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.7);
+}
+
+.radial-control ul {
+    list-style: none;
+    margin: -250px 0 0 -250px;
+    padding: 0;
+    width:500px;
+    height:500px;
+    display:block;
+    position:fixed;
+    top:50%;
+    left:50%;
+    border-radius:50%;
+    cursor:pointer;
+
+}
+
+.radial-control li {
+    position:absolute;
+    display:block;
+    width:100px;
+    height:100px;
+    background: #cccccc;
+    border-radius:50%;
+    text-align: center;
+    line-height:100px;
+    margin:10px;
+    transition: width 0.5s, height 0.5s, margin 0.5s, line-height 0.5s;
+}
+
+.radial-control li.focus {
+    background: #eeeeee;
+    width:120px;
+    height:120px;
+    line-height:120px;
+    margin:0;
+    box-shadow: 0 0 20px #333333;
+    transition: width 0.2s, height 0.2s, margin 0.2s, line-height 0.2s;
+}
+
+.radial-control a.follower {
+    display:block;
+    width:100px;
+    height:100px;
+    position: fixed;
+}
+
+</style>
+
+<div class="trigger">Show Controls</div>
+
+<div class="radial-control">
+    <ul>
+        <li><a href="//google.com">G</a></li>
+        <li>T</li>
+        <li><a href="//twitter.com">Tw</a></li>
+        <li>T</li>
+        <li>T</li>
+        <li>T</li>
+    </ul>
+    <a class="follower"></a>
+</div>
+
+<script>
+var container = $('.radial-control');
+var parent =  $('.radial-control ul');
+var buttons = $('.radial-control li');
+var follower = $('.radial-control a.follower');
+
+var buttonMargin = 20;
+
+var r = parent.width()/2;
+var buttonRadius = (buttons.width() + buttonMargin*2)/2;
+var count = buttons.length;
+var twoPi = 2*Math.PI;
+var arcAngle = twoPi / count;
+
+var angles = [];
+var coords = [];
+var x, y;
+var currentAngle = arcAngle/count;
+
+for(; currentAngle <= twoPi; currentAngle += arcAngle) {
+    x = r * Math.cos(currentAngle) + r - buttonRadius;
+    y = r * Math.sin(currentAngle) + r - buttonRadius;
+
+    angles.push(currentAngle);
+
+    coords.push({
+        x: x,
+        y: y
+    });
+}
+
+for(var i = 0; i < coords.length; i++) {
+    var button = $('li:eq(' + i + ')');
+    var coord = coords[i];
+    button.css({
+        bottom: coord.y,
+        left: coord.x
+    });
+}
+
+container.hide();
+
+function onMouseMove(event) {
+    buttons.removeClass('focus');
+
+    var mx = event.pageX - parent.offset().left;
+    var my = event.pageY - parent.offset().top;
+
+    var cx = r;
+    var cy = r;
+
+    var rx = (mx - cx);
+    var ry = -(my - cy);
+
+    var d = Math.sqrt(rx*rx + ry*ry);
+
+    var angle = Math.atan2(ry, rx);
+    var index = Math.round(angle/arcAngle);
+
+    var highlight = $('li:eq(' + index + ')');
+    highlight.addClass('focus');
+
+    // parent.css({
+    //     'background': 'linear-gradient('+(-angle)+'rad, transparent 49%, #eeeeee 49%, #eeeeee 51%, transparent 51%)'
+    // });
+
+    var anchor = highlight.find('a');
+    follower.css({
+        left: event.clientX-(follower.width()/2) + 'px',
+        top: event.clientY-(follower.height()/2) + 'px'
+    }).attr({
+        'href': anchor.attr('href'),
+        'target': anchor.attr('target'),
+        'title': anchor.attr('title')
+    });
+} 
+
+function showControls() {
+    container.show();
+    $('body').bind('mousemove', onMouseMove);
+    $('.trigger').unbind('click', showControls);
+    $('.trigger').bind('click', hideControls);
+}
+
+function hideControls() {
+    container.hide();
+    $('body').unbind('mousemove', onMouseMove);
+    $('.trigger').unbind('click', hideControls);
+    $('.trigger').bind('click', showControls);
+}
+
+$('.trigger').bind('click', showControls);
+container.bind('click', hideControls);
+
+</script>
+</body>
+</html>
