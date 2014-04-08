@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Test Page - Radial Controls</title>
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/3.0.1/normalize.min.css">
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <title>Test Page - Radial Controls</title>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/3.0.1/normalize.min.css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 </head>
 
-<body><style>
+<body>
+<style>
 .rc-trigger {
     background:pink;
 }
@@ -20,45 +21,54 @@
     background:rgba(0,0,0,0.0);
 }
 
-.radial-control .rc-center {
+.radial-control .rc-main {
+    width:0;
+    height:0;
+    padding:30px;
+    margin-top:-30px;
+    margin-left:-30px;
+    position:fixed;
+    border-radius:50%;
+    background: radial-gradient(transparent 25%, #EEEEEE 27%);
+    border:2px solid #cccccc;
+    transition: width 1s, height 1s, margin 1s;
+}
 
+.radial-control .rc-main.expanded {
+    width:200px;
+    height:200px; 
+    margin-top:-130px;
+    margin-left:-130px; 
 }
 
 .radial-control .rc-links {
     list-style: none;
-    margin: -250px 0 0 -250px;
-    padding: 0;
-    width:500px;
-    height:500px;
+    padding:0;
+    margin:0;
     display:block;
-    position:fixed;
-    top:0;
-    left:0;
+    width:100%;
+    height:100%;
     border-radius:50%;
     cursor:pointer;
+    position:relative;
 }
 
 .radial-control .rc-links .rc-link {
     position:absolute;
     display:block;
-    width:100px;
-    height:100px;
-    background: #cccccc;
-    border-radius:50%;
+    width:60px;
+    height:60px;
     text-align: center;
-    line-height:100px;
-    margin:10px;
-    transition: width 0.5s, height 0.5s, margin 0.5s, line-height 0.5s;
+    line-height:60px;
+    bottom:50%;
+    left:50%;
+    margin-top:-30px;
+    margin-left:-30px;
+    transition: top 0.5s, bottom 0.5s, left 0.5s, margin 0.5s;
 }
 
 .radial-control .rc-links .rc-link.rc-focus {
-    background: #eeeeee;
-    width:120px;
-    height:120px;
-    line-height:120px;
-    margin:0;
-    box-shadow: 0 0 20px #bbbbbb;
-    transition: width 0.2s, height 0.2s, margin 0.2s, line-height 0.2s;
+    font-weight: bold;
 }
 
 .radial-control .rc-follower {
@@ -73,27 +83,26 @@
 <input type="button" class="rc-trigger" value="Show Controls"></input>
 
 <div class="radial-control">
-    <div class="rc-center">
-
+    <div class="rc-main">
+        <ul class="rc-links">
+            <li class="rc-link">
+                <a class="rc-anchor" href="//google.com" target="_blank">G</a>
+            </li>
+            <li class="rc-link">T</li>
+            <li class="rc-link">
+                <a class="rc-anchor" href="//twitter.com">Tw</a>
+            </li>
+            <li class="rc-link">T</li>
+            <li class="rc-link">T</li>
+            <li class="rc-link">T</li>
+        </ul>
     </div>
-    <ul class="rc-links">
-        <li class="rc-link">
-            <a class="rc-anchor" href="//google.com" target="_blank">G</a>
-        </li>
-        <li class="rc-link">T</li>
-        <li class="rc-link">
-            <a class="rc-anchor" href="//twitter.com">Tw</a>
-        </li>
-        <li class="rc-link">T</li>
-        <li class="rc-link">T</li>
-        <li class="rc-link">T</li>
-    </ul>
     <a class="rc-follower"></a>
 </div>
 
 <script>
 var container = $('.radial-control');
-var parent =  $('.radial-control .rc-links');
+var parent =  $('.radial-control .rc-main');
 var buttons = $('.radial-control li');
 var follower = $('.radial-control .rc-follower');
 
@@ -107,20 +116,20 @@ var r,
 container.hide();
 
 function setupControls() {
+    parent.addClass('expanded');
+
     r = parent.width()/2;
     count = buttons.length;
     arcAngle = twoPi / count;
 
-    var buttonRadius = buttons.outerWidth(true)/2;
+    var buttonRadius = buttons.outerWidth()/2;
 
     var angles = [];
     var coords = [];
-    var x, y;
-    var currentAngle = arcAngle/count;
-
-    for(; currentAngle <= twoPi; currentAngle += arcAngle) {
-        x = r * Math.cos(currentAngle) + r - buttonRadius;
-        y = r * Math.sin(currentAngle) + r - buttonRadius;
+    
+    for(var currentAngle = 0; currentAngle <= twoPi; currentAngle += arcAngle) {
+        var x = r * Math.cos(currentAngle) + r - buttonRadius,
+            y = r * Math.sin(currentAngle) + r - buttonRadius;
 
         angles.push(currentAngle);
 
@@ -135,9 +144,11 @@ function setupControls() {
         var coord = coords[i];
         button.css({
             bottom: coord.y,
-            left: coord.x
+            left: coord.x,
+            margin: 0
         });
     }
+
 }
 
 function onMouseMove(event) {
@@ -154,7 +165,7 @@ function onMouseMove(event) {
 
     var d = Math.sqrt(rx*rx + ry*ry);
 
-    if(d > r*2) {
+    if(d > r*2.2) {
         return;
     }
 
@@ -164,9 +175,9 @@ function onMouseMove(event) {
     var highlight = $('.rc-link:eq(' + index + ')');
     highlight.addClass('rc-focus');
 
-    parent.css({
-        'background': 'linear-gradient('+(-angle)+'rad, transparent 49%, #eeeeee 49%, #eeeeee 51%, transparent 51%)'
-    });
+    // parent.css({
+    //     'background': 'linear-gradient('+(-angle)+'rad, transparent 49%, #eeeeee 49%, #eeeeee 51%, transparent 51%)'
+    // });
 
     var anchor = highlight.find('.rc-anchor');
 
@@ -186,6 +197,8 @@ function onMouseMove(event) {
 }
 
 function showControls(event) {
+    container.show();
+
     setupControls();
     // parent.css({
     //     left: $('.rc-trigger').offset().left + $('.rc-trigger').outerWidth()/2 + 'px',
@@ -195,13 +208,20 @@ function showControls(event) {
         left: event.pageX + 'px',
         top: event.pageY + 'px'
     });
-    container.show();
     $('body').bind('mousemove', onMouseMove);
     $('.rc-trigger').unbind('click', showControls);
     $('.rc-trigger').bind('click', hideControls);
 }
 
 function hideControls() {
+    buttons.css({
+        bottom: '50%',
+        left: '50%',
+        'margin-top':'-30px',
+        'margin-left':'-30px'
+    });
+    parent.removeClass('expanded');
+
     container.hide();
     $('body').unbind('mousemove', onMouseMove);
     $('.rc-trigger').unbind('click', hideControls);
