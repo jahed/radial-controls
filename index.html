@@ -7,8 +7,8 @@
 </head>
 
 <body><style>
-.trigger {
-    margin:100px;
+.rc-trigger {
+    background:pink;
 }
     
 .radial-control {
@@ -32,8 +32,8 @@
     height:500px;
     display:block;
     position:fixed;
-    top:50%;
-    left:50%;
+    top:0;
+    left:0;
     border-radius:50%;
     cursor:pointer;
 }
@@ -57,7 +57,7 @@
     height:120px;
     line-height:120px;
     margin:0;
-    box-shadow: 0 0 20px #333333;
+    box-shadow: 0 0 20px #bbbbbb;
     transition: width 0.2s, height 0.2s, margin 0.2s, line-height 0.2s;
 }
 
@@ -70,7 +70,7 @@
 
 </style>
 
-<div class="trigger">Show Controls</div>
+<input type="button" class="rc-trigger" value="Show Controls"></input>
 
 <div class="radial-control">
     <div class="rc-center">
@@ -97,41 +97,48 @@ var parent =  $('.radial-control .rc-links');
 var buttons = $('.radial-control li');
 var follower = $('.radial-control .rc-follower');
 
+var twoPi = 2*Math.PI;
 var buttonMargin = 20;
 
-var r = parent.width()/2;
-var buttonRadius = (buttons.width() + buttonMargin*2)/2;
-var count = buttons.length;
-var twoPi = 2*Math.PI;
-var arcAngle = twoPi / count;
-
-var angles = [];
-var coords = [];
-var x, y;
-var currentAngle = arcAngle/count;
-
-for(; currentAngle <= twoPi; currentAngle += arcAngle) {
-    x = r * Math.cos(currentAngle) + r - buttonRadius;
-    y = r * Math.sin(currentAngle) + r - buttonRadius;
-
-    angles.push(currentAngle);
-
-    coords.push({
-        x: x,
-        y: y
-    });
-}
-
-for(var i = 0; i < coords.length; i++) {
-    var button = $('li:eq(' + i + ')');
-    var coord = coords[i];
-    button.css({
-        bottom: coord.y,
-        left: coord.x
-    });
-}
+var r,
+    count,
+    arcAngle;
 
 container.hide();
+
+function setupControls() {
+    r = parent.width()/2;
+    count = buttons.length;
+    arcAngle = twoPi / count;
+
+    var buttonRadius = buttons.outerWidth(true)/2;
+
+    var angles = [];
+    var coords = [];
+    var x, y;
+    var currentAngle = arcAngle/count;
+
+    for(; currentAngle <= twoPi; currentAngle += arcAngle) {
+        x = r * Math.cos(currentAngle) + r - buttonRadius;
+        y = r * Math.sin(currentAngle) + r - buttonRadius;
+
+        angles.push(currentAngle);
+
+        coords.push({
+            x: x,
+            y: y
+        });
+    }
+
+    for(var i = 0; i < coords.length; i++) {
+        var button = $('li:eq(' + i + ')');
+        var coord = coords[i];
+        button.css({
+            bottom: coord.y,
+            left: coord.x
+        });
+    }
+}
 
 function onMouseMove(event) {
     buttons.removeClass('rc-focus');
@@ -176,23 +183,36 @@ function onMouseMove(event) {
         'target': anchor.attr('target'),
         'title': anchor.attr('title')
     });
-} 
+}
 
-function showControls() {
+function showControls(event) {
+    setupControls();
+    // parent.css({
+    //     left: $('.rc-trigger').offset().left + $('.rc-trigger').outerWidth()/2 + 'px',
+    //     top: $('.rc-trigger').offset().top + $('.rc-trigger').outerHeight()/2 + 'px'
+    // });
+    parent.css({
+        left: event.pageX + 'px',
+        top: event.pageY + 'px'
+    });
     container.show();
     $('body').bind('mousemove', onMouseMove);
-    $('.trigger').unbind('click', showControls);
-    $('.trigger').bind('click', hideControls);
+    $('.rc-trigger').unbind('click', showControls);
+    $('.rc-trigger').bind('click', hideControls);
 }
 
 function hideControls() {
     container.hide();
     $('body').unbind('mousemove', onMouseMove);
-    $('.trigger').unbind('click', hideControls);
-    $('.trigger').bind('click', showControls);
+    $('.rc-trigger').unbind('click', hideControls);
+    $('.rc-trigger').bind('click', showControls);
 }
 
-$('.trigger').bind('click', showControls);
+$('.rc-trigger').css({
+    margin: Math.random()*500+100 + 'px'
+});
+
+$('.rc-trigger').bind('click', showControls);
 container.bind('click', hideControls);
 
 </script>
