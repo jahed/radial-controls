@@ -1,22 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>Test Page - Radial Controls</title>
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/3.0.1/normalize.min.css">
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-
 </head>
 
 <body><style>
+.trigger {
+    margin:100px;
+}
+    
 .radial-control {
     position:fixed;
     top:0;
     left:0;
     width:100%;
     height:100%;
-    background:rgba(0,0,0,0.7);
+    background:rgba(0,0,0,0.0);
 }
 
-.radial-control ul {
+.radial-control .rc-center {
+
+}
+
+.radial-control .rc-links {
     list-style: none;
     margin: -250px 0 0 -250px;
     padding: 0;
@@ -28,10 +36,9 @@
     left:50%;
     border-radius:50%;
     cursor:pointer;
-
 }
 
-.radial-control li {
+.radial-control .rc-links .rc-link {
     position:absolute;
     display:block;
     width:100px;
@@ -44,7 +51,7 @@
     transition: width 0.5s, height 0.5s, margin 0.5s, line-height 0.5s;
 }
 
-.radial-control li.focus {
+.radial-control .rc-links .rc-link.rc-focus {
     background: #eeeeee;
     width:120px;
     height:120px;
@@ -54,7 +61,7 @@
     transition: width 0.2s, height 0.2s, margin 0.2s, line-height 0.2s;
 }
 
-.radial-control a.follower {
+.radial-control .rc-follower {
     display:block;
     width:100px;
     height:100px;
@@ -66,22 +73,29 @@
 <div class="trigger">Show Controls</div>
 
 <div class="radial-control">
-    <ul>
-        <li><a href="//google.com">G</a></li>
-        <li>T</li>
-        <li><a href="//twitter.com">Tw</a></li>
-        <li>T</li>
-        <li>T</li>
-        <li>T</li>
+    <div class="rc-center">
+
+    </div>
+    <ul class="rc-links">
+        <li class="rc-link">
+            <a class="rc-anchor" href="//google.com" target="_blank">G</a>
+        </li>
+        <li class="rc-link">T</li>
+        <li class="rc-link">
+            <a class="rc-anchor" href="//twitter.com">Tw</a>
+        </li>
+        <li class="rc-link">T</li>
+        <li class="rc-link">T</li>
+        <li class="rc-link">T</li>
     </ul>
-    <a class="follower"></a>
+    <a class="rc-follower"></a>
 </div>
 
 <script>
 var container = $('.radial-control');
-var parent =  $('.radial-control ul');
+var parent =  $('.radial-control .rc-links');
 var buttons = $('.radial-control li');
-var follower = $('.radial-control a.follower');
+var follower = $('.radial-control .rc-follower');
 
 var buttonMargin = 20;
 
@@ -120,7 +134,7 @@ for(var i = 0; i < coords.length; i++) {
 container.hide();
 
 function onMouseMove(event) {
-    buttons.removeClass('focus');
+    buttons.removeClass('rc-focus');
 
     var mx = event.pageX - parent.offset().left;
     var my = event.pageY - parent.offset().top;
@@ -133,17 +147,27 @@ function onMouseMove(event) {
 
     var d = Math.sqrt(rx*rx + ry*ry);
 
+    if(d > r*2) {
+        return;
+    }
+
     var angle = Math.atan2(ry, rx);
     var index = Math.round(angle/arcAngle);
 
-    var highlight = $('li:eq(' + index + ')');
-    highlight.addClass('focus');
+    var highlight = $('.rc-link:eq(' + index + ')');
+    highlight.addClass('rc-focus');
 
-    // parent.css({
-    //     'background': 'linear-gradient('+(-angle)+'rad, transparent 49%, #eeeeee 49%, #eeeeee 51%, transparent 51%)'
-    // });
+    parent.css({
+        'background': 'linear-gradient('+(-angle)+'rad, transparent 49%, #eeeeee 49%, #eeeeee 51%, transparent 51%)'
+    });
 
-    var anchor = highlight.find('a');
+    var anchor = highlight.find('.rc-anchor');
+
+    if(anchor.length === 0) {
+        follower.removeAttr('href target title');
+        return;
+    }
+
     follower.css({
         left: event.clientX-(follower.width()/2) + 'px',
         top: event.clientY-(follower.height()/2) + 'px'
