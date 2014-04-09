@@ -2,99 +2,19 @@
 <html>
 <head>
     <title>Test Page - Radial Controls</title>
+
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/3.0.1/normalize.min.css">
-    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+    <link rel="stylesheet" href="./radial-controls.css">
+
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-</head>
+    <script src="./radial-controls.js"></script>
 
 <body>
-<style>
-.rc-trigger {
-    background:pink;
-}
-    
-.radial-control {
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.0);
-}
 
-.radial-control .rc-main {
-    width:0;
-    height:0;
-    padding:30px;
-    margin-top:-30px;
-    margin-left:-30px;
-    position:fixed;
-    border-radius:50%;
-    background: radial-gradient(transparent 25%, #EEEEEE 27%);
-    border:2px solid #cccccc;
-    transition: width 1s, height 1s, margin 1s;
-}
+<input type="button" class="trig" value="Show Controls"></input>
 
-.radial-control .rc-main.expanded {
-    width:200px;
-    height:200px; 
-    margin-top:-130px;
-    margin-left:-130px; 
-}
-
-.radial-control .rc-links {
-    list-style: none;
-    padding:0;
-    margin:0;
-    display:block;
-    width:100%;
-    height:100%;
-    border-radius:50%;
-    cursor:pointer;
-    position:relative;
-}
-
-.radial-control .rc-links .rc-link {
-    position:absolute;
-    display:block;
-    width:60px;
-    height:60px;
-    text-align: center;
-    line-height:60px;
-    bottom:50%;
-    left:50%;
-    margin-top:-30px;
-    margin-left:-30px;
-    transition: top 0.5s, bottom 0.5s, left 0.5s, margin 0.5s;
-    font-size:30px;
-    color:#999999;
-}
-
-.radial-control .rc-links .rc-link .rc-anchor {
-    font-family: 'FontAwesome';
-    text-decoration: none;
-}
-
-.radial-control .rc-links .rc-link .rc-anchor:visited {
-    color: inherit;
-}
-
-.radial-control .rc-links .rc-link.rc-focus {
-    color: #000000;
-}
-
-.radial-control .rc-follower {
-    display:block;
-    width:100px;
-    height:100px;
-    position: fixed;
-}
-
-</style>
-
-<input type="button" class="rc-trigger" value="Show Controls"></input>
-
-<div class="radial-control">
+<!--<div class="radial-control">
     <div class="rc-main">
         <ul class="rc-links">
             <li class="rc-link">
@@ -118,142 +38,59 @@
         </ul>
     </div>
     <a class="rc-follower"></a>
-</div>
+</div>-->
 
 <script>
-var container = $('.radial-control');
-var parent =  $('.radial-control .rc-main');
-var buttons = $('.radial-control li');
-var follower = $('.radial-control .rc-follower');
 
-var twoPi = 2*Math.PI;
-var buttonMargin = 20;
-
-var r,
-    count,
-    arcAngle;
-
-container.hide();
-
-function setupControls() {
-    parent.addClass('expanded');
-
-    r = parent.width()/2;
-    count = buttons.length;
-    arcAngle = twoPi / count;
-
-    var buttonRadius = buttons.outerWidth()/2;
-
-    var angles = [];
-    var coords = [];
-    
-    for(var currentAngle = 0; currentAngle <= twoPi; currentAngle += arcAngle) {
-        var x = r * Math.cos(currentAngle) + r - buttonRadius,
-            y = r * Math.sin(currentAngle) + r - buttonRadius;
-
-        angles.push(currentAngle);
-
-        coords.push({
-            x: x,
-            y: y
-        });
-    }
-
-    for(var i = 0; i < coords.length; i++) {
-        var button = $('li:eq(' + i + ')');
-        var coord = coords[i];
-        button.css({
-            bottom: coord.y,
-            left: coord.x,
-            margin: 0
-        });
-    }
-
-}
-
-function onMouseMove(event) {
-    buttons.removeClass('rc-focus');
-
-    var mx = event.pageX - parent.offset().left;
-    var my = event.pageY - parent.offset().top;
-
-    var cx = r;
-    var cy = r;
-
-    var rx = (mx - cx);
-    var ry = -(my - cy);
-
-    var d = Math.sqrt(rx*rx + ry*ry);
-
-    if(d > r*2.2) {
-        return;
-    }
-
-    var angle = Math.atan2(ry, rx);
-    var index = Math.round(angle/arcAngle);
-
-    var highlight = $('.rc-link:eq(' + index + ')');
-    highlight.addClass('rc-focus');
-
-    // parent.css({
-    //     'background': 'linear-gradient('+(-angle)+'rad, transparent 49%, #eeeeee 49%, #eeeeee 51%, transparent 51%)'
-    // });
-
-    var anchor = highlight.find('.rc-anchor');
-
-    if(anchor.length === 0) {
-        follower.removeAttr('href target title');
-        return;
-    }
-
-    follower.css({
-        left: event.clientX-(follower.width()/2) + 'px',
-        top: event.clientY-(follower.height()/2) + 'px'
-    }).attr({
-        'href': anchor.attr('href'),
-        'target': anchor.attr('target'),
-        'title': anchor.attr('title')
-    });
-}
-
-function showControls(event) {
-    container.show();
-
-    setupControls();
-    // parent.css({
-    //     left: $('.rc-trigger').offset().left + $('.rc-trigger').outerWidth()/2 + 'px',
-    //     top: $('.rc-trigger').offset().top + $('.rc-trigger').outerHeight()/2 + 'px'
-    // });
-    parent.css({
-        left: event.pageX + 'px',
-        top: event.pageY + 'px'
-    });
-    $('body').bind('mousemove', onMouseMove);
-    $('.rc-trigger').unbind('click', showControls);
-    $('.rc-trigger').bind('click', hideControls);
-}
-
-function hideControls() {
-    buttons.css({
-        bottom: '50%',
-        left: '50%',
-        'margin-top':'-30px',
-        'margin-left':'-30px'
-    });
-    parent.removeClass('expanded');
-
-    container.hide();
-    $('body').unbind('mousemove', onMouseMove);
-    $('.rc-trigger').unbind('click', hideControls);
-    $('.rc-trigger').bind('click', showControls);
-}
-
-$('.rc-trigger').css({
-    margin: Math.random()*500+100 + 'px'
+var $radialControls = $('<div>').radialControls({
+    $triggers: $('.trig'),
+    controls: [
+        {
+            text: '&#xf15b;',
+            title: 'New File',
+            onclick: function() {
+                alert('New File');
+            }
+        },
+        {
+            text: '&#xf07c;',
+            title: 'Open',
+            onclick: function() {
+                alert('Open');
+            }
+        },
+        {
+            text: '&#xf0c7;',
+            title: 'Save',
+            onclick: function() {
+                alert('Save');
+            }
+        },
+        {
+            text: '&#xf019;',
+            title: 'Download',
+            onclick: function() {
+                alert('Download');
+            }
+        },
+        {
+            text: '&#xf0e2;',
+            title: 'Undo',
+            onclick: function() {
+                alert('Undo');
+            }
+        },
+        {
+            text: '&#xf013;',
+            title: 'Settings',
+            onclick: function() {
+                alert('Settings');
+            }
+        },
+    ]
 });
 
-$('.rc-trigger').bind('click', showControls);
-container.bind('click', hideControls);
+$('body').append($radialControls);
 
 </script>
 </body>
