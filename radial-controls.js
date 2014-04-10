@@ -15,6 +15,7 @@ $.fn.radialControls = function(userOptions) {
         $main,
         $linksParent,
         $links,
+        $wheel,
         options = $.extend({}, defaultOptions, userOptions),
         mainHalfWidth,
         count,
@@ -51,8 +52,11 @@ $.fn.radialControls = function(userOptions) {
             $trigger.bind('click', showControls);
         });
 
+        $wheel = $('<div>').addClass('rc-wheel');
+
         $container.append(
             $main.append(
+                $wheel,
                 $linksParent.append(
                     $links
                 )
@@ -77,10 +81,10 @@ $.fn.radialControls = function(userOptions) {
     }
 
     function setupControls() {
-        mainHalfWidth = 200/2;
+        mainHalfWidth = $linksParent.width()/2;
         arcAngle = TWO_PI / $links.length;
 
-        var linkHalfWidth = $links.outerWidth()/2;
+        var linkHalfWidth = $links.width()/2;
 
         $links.each(function(index) {
             var $link = $(this);
