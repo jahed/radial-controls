@@ -2,4 +2,6 @@
 
 Radial controls for the web.
 
-Work in progress.
+![Preview](https://raw.githubusercontent.com/Jahed/radial-controls/master/preview.gif)
+
+See the example.html for usage.
