@@ -16,6 +16,7 @@ $.fn.radialControls = function(userOptions) {
         $linksParent,
         $links,
         $wheel,
+        $overlay,
         options = $.extend({}, defaultOptions, userOptions),
         mainHalfWidth,
         count,
@@ -53,8 +54,10 @@ $.fn.radialControls = function(userOptions) {
         });
 
         $wheel = $('<div>').addClass('rc-wheel');
+        $overlay = $('<div>').addClass('rc-overlay');
 
         $container.append(
+            $overlay,
             $main.append(
                 $wheel,
                 $linksParent.append(
