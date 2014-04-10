@@ -4,22 +4,23 @@ var TWO_PI = 2*Math.PI;
 var defaultOptions = {
     $triggers: null,
     controls: null,
-    centerOnCursor: true
+    centerOnCursor: true,
+    distance: 20
 };
 
 
 $.fn.radialControls = function(userOptions) {
 
     var $container = this,
+        options = $.extend({}, defaultOptions, userOptions),
         $body = $('body'),
         $main,
         $linksParent,
         $links,
         $wheel,
         $overlay,
-        options = $.extend({}, defaultOptions, userOptions),
+        $wrapper,
         mainHalfWidth,
-        count,
         arcAngle;
 
     function buildControls() {
@@ -40,7 +41,6 @@ $.fn.radialControls = function(userOptions) {
             $link.attr({
                 'title': control.title
             });
-            $link.bind('click', control.onclick);
 
             $linksParent.append($link);
         }
@@ -55,13 +55,16 @@ $.fn.radialControls = function(userOptions) {
 
         $wheel = $('<div>').addClass('rc-wheel');
         $overlay = $('<div>').addClass('rc-overlay');
+        $wrapper = $('<div>').addClass('rc-wrapper');
 
         $container.append(
             $overlay,
-            $main.append(
-                $wheel,
-                $linksParent.append(
-                    $links
+            $wrapper.append(
+                $main.append(
+                    $wheel,
+                    $linksParent.append(
+                        $links
+                    )
                 )
             )
         );
@@ -75,7 +78,7 @@ $.fn.radialControls = function(userOptions) {
 
         setupControls();
 
-        $main.css({
+        $wrapper.css({
             left: event.pageX + 'px',
             top: event.pageY + 'px'
         });
@@ -107,7 +110,8 @@ $.fn.radialControls = function(userOptions) {
 
     function onMouseMove(event) {
         $links.removeClass('rc-focus');
-        $main.unbind('click');
+        $wrapper.unbind('click');
+
 
         var mx = event.pageX - $main.offset().left;
         var my = event.pageY - $main.offset().top;
@@ -120,7 +124,10 @@ $.fn.radialControls = function(userOptions) {
 
         var d = Math.sqrt(rx*rx + ry*ry);
 
-        if(d > mainHalfWidth*2.2 || d < mainHalfWidth*0.3) {
+        if(d > mainHalfWidth*2 + options.distance || d < mainHalfWidth*0.3) {
+            $wrapper.css({
+                'cursor': ''
+            });
             return;
         }
 
@@ -131,7 +138,10 @@ $.fn.radialControls = function(userOptions) {
 
         var $highlight = $links.eq(index).addClass('rc-focus');
 
-        // $main.bind('click', options.controls[index].onclick);
+        $wrapper.bind('click', options.controls[index].onclick);
+        $wrapper.css({
+            'cursor': 'pointer'
+        });
     }
 
     function hideControls() {
